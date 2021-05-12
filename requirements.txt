@@ -4,17 +4,7 @@
 #
 #    pip-compile
 #
-asgiref==3.3.4            # via django
-click==7.1.2              # via pip-tools
-django==3.2.2             # via -r requirements.in
-pip-tools==5.4.0          # via -r requirements.in
 pyobjc-core==7.2          # via pyobjc-framework-cocoa, pyobjc-framework-webkit, pywebview
 pyobjc-framework-cocoa==7.2  # via pyobjc-framework-webkit, pywebview
 pyobjc-framework-webkit==7.2  # via pywebview
-pytz==2021.1              # via django
 pywebview==3.4            # via -r requirements.in
-six==1.16.0               # via pip-tools
-sqlparse==0.4.1           # via django
-
-# The following packages are considered to be unsafe in a requirements file:
-# pip

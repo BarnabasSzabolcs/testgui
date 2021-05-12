@@ -1,5 +1,5 @@
-# pytestgui
-Drop-in replacement GUI for Django testing.  
+# testgui
+Drop-in replacement GUI for Django testing.
 
 ### Usage:
 
@@ -9,13 +9,23 @@ replace your management command `test` with `testgui`. It works with the same pa
 
 ### Installation:
 
-    pip install git+git://github.com/BarnabasSzabolcs/pytestgui#egg=pytestgui
+    pip install git+git://github.com/BarnabasSzabolcs/testgui#egg=testgui
 
-Then add `'testgui'` to your `INSTALLED_APPS` in `settings.py`.
+Then add testgui to INSTALLED_APPS in settings.py:
+
+    INSTALLED_APPS = [
+        ...
+        'testgui',
+        ...
+    ]
 
 #### Dependencies: 
 
 django, pywebview
+
+#### License:
+
+MIT license
 
 ## Features:
 
