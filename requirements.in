@@ -1,0 +1,3 @@
+django
+pywebview
+pip-tools==5.4.0
