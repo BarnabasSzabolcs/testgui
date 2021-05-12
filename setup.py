@@ -1,7 +1,7 @@
 import os.path
 import re
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # ref. https://github.com/andreyfedoseev/django-static-precompiler/blob/master/setup.py
 with open("testgui/__init__.py") as fd:
@@ -20,7 +20,7 @@ README = read('README.md')
 
 setup(
     name="testgui",
-    packages=["testgui"],
+    packages=find_packages(),
     version=version,
     author="Barney Szabolcs",
     author_email="szabolcs.barnabas@gmail.com",

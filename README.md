@@ -9,7 +9,7 @@ replace your management command `test` with `testgui`. It works with the same pa
 
 ### Installation:
 
-    pip install git+git://github.com/BarnabasSzabolcs/testgui#egg=testgui
+    pip install -e git+git://github.com/BarnabasSzabolcs/testgui@master#egg=testgui
 
 Then add testgui to INSTALLED_APPS in settings.py:
 
