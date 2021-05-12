@@ -1,4 +1,5 @@
 import importlib
+import os
 import sys
 from os.path import dirname
 from threading import Thread
@@ -123,8 +124,10 @@ class Command(test.Command):
 
     def create_gui(self, test_runner, test_labels, old_config):
         api = Api(test_runner, test_labels, old_config)
+        this_file = os.path.dirname(__file__)
+        testgui_path = this_file[:-len('/management/commands')]
         window = webview.create_window('TestGUI',
-                                       'testgui/assets/index.html',
+                                       os.path.join(testgui_path, 'assets/index.html'),
                                        js_api=api,
                                        min_size=(600, 450),
                                        )
