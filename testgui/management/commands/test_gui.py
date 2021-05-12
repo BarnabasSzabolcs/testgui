@@ -172,4 +172,4 @@ def populate_tests(test_runner, test_labels):
         run_failed = True
         teardown(old_config, run_failed, test_runner)
         raise
-    return old_config, suite
+    return old_config
