@@ -79,16 +79,6 @@ class Api:
         results = self.test_runner.run_suite(suite)
         self.send_results(tests, results)
 
-    def print_message(self, msg):
-        msg = msg.replace('"', r'\"')
-        # self.original_write_out(msg)
-        self.window.evaluate_js(f'addLog("{msg}")')
-
-    def print_error(self, msg):
-        msg = msg.replace('"', r'\"')
-        # self.original_write_error(msg)
-        self.window.evaluate_js(f'addError("{msg}")')
-
     def send_results(self, tests, results):
         unsuccessful = set()
 
@@ -150,8 +140,7 @@ def get_path(test: TestCase) -> List[str]:
 
 def teardown(old_config, run_failed, test_runner):
     try:
-        with test_runner.time_keeper.timed('Total database teardown'):
-            test_runner.teardown_databases(old_config)
+        test_runner.teardown_databases(old_config)
         test_runner.teardown_test_environment()
     except Exception:
         # Silence teardown exceptions if an exception was raised during
@@ -164,8 +153,7 @@ def populate_tests(test_runner, test_labels):
     suite = test_runner.build_suite(test_labels)
     # modified version of DiscoverRunner's run_tests
     databases = test_runner.get_databases(suite)
-    with test_runner.time_keeper.timed('Total database setup'):
-        old_config = test_runner.setup_databases(aliases=databases)
+    old_config = test_runner.setup_databases(aliases=databases)
     try:
         test_runner.run_checks(databases)
     except Exception:
