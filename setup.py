@@ -1,6 +1,8 @@
 import os.path
+import pathlib
 import re
 
+import pkg_resources
 from setuptools import setup, find_packages
 
 # ref. https://github.com/andreyfedoseev/django-static-precompiler/blob/master/setup.py
@@ -17,6 +19,13 @@ def read(fname):
 
 
 README = read('README.md')
+
+with pathlib.Path('requirements.in').open() as requirements_in:
+    install_requires = [
+        str(requirement)
+        for requirement
+        in pkg_resources.parse_requirements(requirements_in)
+    ]
 
 setup(
     name="testgui",
@@ -37,5 +46,5 @@ setup(
     ],
     keywords=["test", "django", "management command", "test GUI", "GUI"],
     python_requires=">=3.5",
-    install_requires=[],
+    install_requires=install_requires,
 )
