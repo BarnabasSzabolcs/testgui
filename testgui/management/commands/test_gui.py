@@ -5,6 +5,7 @@ from threading import Thread
 from typing import List
 from unittest import TestCase
 
+import django
 import webview
 from django.conf import settings
 from django.core.management.commands import test
@@ -155,7 +156,10 @@ def populate_tests(test_runner, test_labels):
     databases = test_runner.get_databases(suite)
     old_config = test_runner.setup_databases(aliases=databases)
     try:
-        test_runner.run_checks(databases)
+        if django.VERSION[0] == 2:
+            test_runner.run_checks()
+        else:
+            test_runner.run_checks(databases)
     except Exception:
         run_failed = True
         teardown(old_config, run_failed, test_runner)
