@@ -3,9 +3,9 @@ Drop-in replacement GUI for Django testing.
 
 ### Usage:
 
-replace your management command `test` with `test_gui`. It works with the same parameters out of the box. eg.
+replace your management command `test` with `testgui`. It works with the same parameters out of the box. eg.
 
-    python manage.py test_gui
+    python manage.py testgui
 
 ### Installation:
 
