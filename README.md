@@ -21,7 +21,8 @@ Then add testgui to INSTALLED_APPS in settings.py:
 
 #### Dependencies: 
 
-django, pywebview
+ * django
+ * pywebview
 
 #### License:
 
@@ -34,5 +35,5 @@ MIT license
 - normal debugging (You can still use PyCharm or your favorite IDE to debug your code, just as with manage.py test.)
 - run selected test (You just click the icon next to a test or an app and your test runs, don't need to stop debugging.)
 
-* note that unfortunately models.py and admin.py files cannot be hot-reloaded by Django's design. 
+*note that unfortunately models.py and admin.py files cannot be hot-reloaded by Django's design. 
 However, TestGUI warns you about this and it does not hot-reload these modules.
