@@ -9,6 +9,9 @@
         .text-code{
           font-family: 'Courier', monospace;
         }
+        .code{
+          white-space: pre;
+        }
         .selectable{
           -webkit-user-select: text;  /* Chrome 49+ */
           -moz-user-select: text;     /* Firefox 43+ */
@@ -67,11 +70,12 @@
         </template>
         <q-card>
           <q-card-section>
-            <pre
-                class="text-code selectable"
+            <div
+                class="text-code code selectable"
                 :class="{'text-grey': test.status=='running'}"
                 style="max-width: 100%; overflow: auto;"
-            >{{test.message}}</pre>
+                v-html="test.message"
+            ></div>
           </q-card-section>
         </q-card>
       </q-expansion-item>

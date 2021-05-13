@@ -10,6 +10,7 @@ from unittest import TestCase
 
 import django
 import webview
+from ansi2html import Ansi2HTMLConverter
 from django.conf import settings
 from django.core.management.commands import test
 # noinspection PyProtectedMember
@@ -21,6 +22,18 @@ load_time = datetime.datetime.now()
 def get_last_mod_time(file_path):
     fname = pathlib.Path(file_path)
     return datetime.datetime.fromtimestamp(fname.stat().st_mtime)
+
+
+def html_from_ansi(ansi: str) -> str:
+    """
+    include ansi.min.css
+    :param ansi:
+    :return:
+    """
+    ansi = ansi.replace('<', '&lt;').replace('>', '&gt;')
+    conv = Ansi2HTMLConverter(linkify=True, inline=True, scheme="solarized")
+    html = conv.convert(ansi, full=False)
+    return html
 
 
 class Api:
@@ -111,6 +124,7 @@ class Api:
             name = ".".join(get_path(test_case))
         else:
             raise NotImplementedError
+        msg = html_from_ansi(msg)
         msg = msg.replace('"', r'\"').replace('\n', r'\n')
         code = f'setResult({{name: "{name}", status: "{status}", message: "{msg}"}})'
         self.window.evaluate_js(code)

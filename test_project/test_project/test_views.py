@@ -10,13 +10,13 @@ class ViewsTestCase(TestCase):
 
     def test_dummy2(self):
         time.sleep(2)
-        return
+        # return
         self.assertEqual(dummy(), 'dummy2')
 
 
 class AnotherTestCase(TestCase):
     def test_dummy3(self):
-        return
+        # return
         self.assertEqual(error)
         self.assertEqual(dummy(), 'dummy3')
 

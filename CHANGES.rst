@@ -2,8 +2,18 @@
 Changelog
 *********
 
-0.1
+0.2 -- planned features
 ===
+
+ - Compatibility with redgreenunittest (done)
+ - Tree layout of test cases with per module stats
+ - Ability to run tests within a module
+ - Ability to run tests within a TestCase class
+ - Ability to restrict by tags
+ - Makes hot-reload optional
+
+0.1.1
+=====
 
  - Initial release
  - drop-in replacement command testgui for django management command test
