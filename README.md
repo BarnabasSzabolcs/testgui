@@ -24,6 +24,8 @@ Then add testgui to INSTALLED_APPS in settings.py:
  * django
  * pywebview
 
+ Compatible with redgreenunittest.
+
 #### License:
 
 MIT license
