@@ -89,11 +89,14 @@ class Api:
         th.join()
 
     def run_test_job(self, test_label):
-
-        suite = self.test_runner.build_suite((test_label,))
-        tests = suite._tests[:]
-        results = self.test_runner.run_suite(suite)
-        self.send_results(tests, results)
+        try:
+            suite = self.test_runner.build_suite((test_label,))
+            tests = suite._tests[:]
+            results = self.test_runner.run_suite(suite)
+            self.send_results(tests, results)
+        except Exception as e:
+            msg = f'ERROR: Could not run the test, the following error was raised:\n\n{e.args[0]}'
+            self.send_result(test_case=test_label, msg=msg, status='error')
 
     def send_warning(self, msg):
         print(f'WARNING: {msg}')
@@ -101,25 +104,30 @@ class Api:
         code = f'setWarning({{ message: "{msg}"}})'
         self.window.evaluate_js(code)
 
+    def send_result(self, test_case, msg, status):
+        if isinstance(test_case, str):
+            name = test_case
+        elif isinstance(test_case, TestCase):
+            name = ".".join(get_path(test_case))
+        else:
+            raise NotImplementedError
+        msg = msg.replace('"', r'\"').replace('\n', r'\n')
+        code = f'setResult({{name: "{name}", status: "{status}", message: "{msg}"}})'
+        self.window.evaluate_js(code)
+
     def send_results(self, tests, results):
         unsuccessful = set()
 
-        def send(test_case, msg, status):
-            name = ".".join(get_path(test_case))
-            msg = msg.replace('"', r'\"').replace('\n', r'\n')
-            code = f'setResult({{name: "{name}", status: "{status}", message: "{msg}"}})'
-            self.window.evaluate_js(code)
-
         for test, msg in results.failures:
-            send(test, msg, status='failure')
+            self.send_result(test, msg, status='failure')
             unsuccessful.add(test)
         for test, msg in results.errors:
-            send(test, msg, status='error')
+            self.send_result(test, msg, status='error')
             unsuccessful.add(test)
         for test in tests:
             if test in unsuccessful:
                 continue
-            send(test, '', status='success')
+            self.send_result(test, '', status='success')
 
 
 class Command(test.Command):
