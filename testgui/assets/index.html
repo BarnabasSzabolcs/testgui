@@ -49,7 +49,7 @@
       >
         <template v-slot:header>
             <div class="q-item__section column q-item__section--avatar q-item__section--side justify-center">
-                <q-spinner v-if="test.status=='running'"></q-spinner>
+                <q-spinner v-if="test.status=='running'" @click="runTests([test])"></q-spinner>
                 <q-icon v-else
                         :name="test | statusIcon"
                         :class="test | statusColor"
@@ -75,6 +75,9 @@
           </q-card-section>
         </q-card>
       </q-expansion-item>
+        <div v-if="loadingTests" class="fixed-center">
+            Loading tests... <q-spinner></q-spinner>
+        </div>
     </q-page-container>
     <q-footer class="q-px-sm"
               :class="{'text-black bg-white': !allSuccess, 'text-white bg-positive': allSuccess}"

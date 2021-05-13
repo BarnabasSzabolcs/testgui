@@ -6,6 +6,7 @@ app = new Vue({
         tests: {},
         expandProblems: true,
         reloadModules: true,
+        loadingTests: true,
       }
     },
     filters: {
@@ -47,6 +48,7 @@ app = new Vue({
     methods: {
         repopulateTests(){
             this.tests = {}
+            this.loadingTests = true
             window.pywebview.api.repopulate_tests()
         },
         runAllTests(){
@@ -85,6 +87,7 @@ function initTests(tests){
     })
     app.setTestStatus(app._data.tests[name], 'notRun')
   })
+  app._data.loadingTests = false
 }
 function setResult({name, message, status}){
     app.setTestStatus(app._data.tests[name], status)
