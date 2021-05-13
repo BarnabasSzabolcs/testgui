@@ -30,6 +30,7 @@ with pathlib.Path('requirements.in').open() as requirements_in:
 setup(
     name="testgui",
     packages=find_packages(),
+    package_data={'testgui': ['assets/*']},
     version=version,
     author="Barney Szabolcs",
     author_email="szabolcs.barnabas@gmail.com",
@@ -43,6 +44,7 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: MIT License'
     ],
     keywords=["test", "django", "management command", "test GUI", "GUI"],
     python_requires=">=3.5",
