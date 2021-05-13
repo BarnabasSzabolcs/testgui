@@ -90,3 +90,13 @@ function setResult({name, message, status}){
     app.setTestStatus(app._data.tests[name], status)
     app._data.tests[name].message = message
 }
+function setWarning({message}){
+    const longTimeOut = 7000
+    app.$q.notify({
+        type: 'warning',
+        timeout: longTimeOut,
+        position: 'top',
+        message: message,
+        multiline: true,
+    })
+}

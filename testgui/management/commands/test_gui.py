@@ -1,5 +1,7 @@
+import datetime
 import importlib
 import os
+import pathlib
 import sys
 from os.path import dirname
 from threading import Thread
@@ -12,6 +14,13 @@ from django.conf import settings
 from django.core.management.commands import test
 # noinspection PyProtectedMember
 from django.test.utils import get_runner
+
+load_time = datetime.datetime.now()
+
+
+def get_last_mod_time(file_path):
+    fname = pathlib.Path(file_path)
+    return datetime.datetime.fromtimestamp(fname.stat().st_mtime)
 
 
 class Api:
@@ -32,11 +41,10 @@ class Api:
         self.window = window
         window.evaluate_js(f'initTests({self.tests})')
 
-    @staticmethod
-    def reload_code():
+    def reload_code(self):
         project_folder = dirname(sys.modules['__main__'].__file__)
         modules = list(sys.modules.values())
-        print('reloading modules in project folder (except for manage.py)...')
+        print("reloading modules in project folder (except for manage.py, models.py's and admin.py's)...")
         for module in modules:
             if not hasattr(module, '__file__'):
                 continue
@@ -44,9 +52,15 @@ class Api:
                 continue
             if 'lib/python' in module.__file__:
                 continue
-            if module.__name__ == '__main__':
-                continue
             if not module.__file__.startswith(project_folder):
+                continue
+            if load_time > get_last_mod_time(module.__file__):
+                continue
+            if module.__name__ == '__main__':
+                self.send_warning(f'Cannot reload __main__ module ({module.__file__})!')
+                continue
+            if any(s in module.__name__.split('.')[-1] for s in ['admin', 'models']):
+                self.send_warning(f'Cannot reload admin/model module {module.__name__}!')
                 continue
             print('reloading', module.__name__)
             importlib.reload(module)
@@ -80,6 +94,12 @@ class Api:
         tests = suite._tests[:]
         results = self.test_runner.run_suite(suite)
         self.send_results(tests, results)
+
+    def send_warning(self, msg):
+        print(f'WARNING: {msg}')
+        msg = msg.replace('"', r'\"').replace('\n', r'\n')
+        code = f'setWarning({{ message: "{msg}"}})'
+        self.window.evaluate_js(code)
 
     def send_results(self, tests, results):
         unsuccessful = set()
