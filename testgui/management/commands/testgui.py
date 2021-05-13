@@ -52,7 +52,7 @@ class Api:
     def init_tests(self, window):
         self.tests = self.collect_tests(self.test_runner, self.test_labels)
         self.window = window
-        window.evaluate_js(f'initTests({self.tests})')
+        window.evaluate_js(f'app.initTests({self.tests})')
 
     def reload_code(self):
         project_folder = dirname(sys.modules['__main__'].__file__)
@@ -114,7 +114,7 @@ class Api:
     def send_warning(self, msg):
         print(f'WARNING: {msg}')
         msg = msg.replace('"', r'\"').replace('\n', r'\n')
-        code = f'setWarning({{ message: "{msg}"}})'
+        code = f'app.setWarning({{ message: "{msg}"}})'
         self.window.evaluate_js(code)
 
     def send_result(self, test_case, msg, status):
@@ -126,7 +126,7 @@ class Api:
             raise NotImplementedError
         msg = html_from_ansi(msg)
         msg = msg.replace('"', r'\"').replace('\n', r'\n')
-        code = f'setResult({{name: "{name}", status: "{status}", message: "{msg}"}})'
+        code = f'app.setResult({{name: "{name}", status: "{status}", message: "{msg}"}})'
         self.window.evaluate_js(code)
 
     def send_results(self, tests, results):

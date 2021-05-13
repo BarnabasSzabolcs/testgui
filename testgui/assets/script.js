@@ -1,5 +1,5 @@
 var failedStatuses = ['error', 'failure']
-app = new Vue({
+var app = new Vue({
     el: '#q-app',
     data: function () {
       return {
@@ -73,33 +73,35 @@ app = new Vue({
             if(this.expandProblems){
                 this.$set(test,'expand', ['error', 'failure'].includes(test.status))
             }
+        },
+
+        // functions called by the backend
+        initTests(tests){
+          this.$set(this, 'tests', {})
+          tests.forEach((e, i)=>{
+            var name = e.join('.')
+            this.$set(
+                this.tests, name, {
+                path: e,
+                index: i,
+            })
+            this.setTestStatus(this.tests[name], 'notRun')
+          })
+          this.loadingTests = false
+        },
+        setResult({name, message, status}){
+            this.setTestStatus(this.tests[name], status)
+            this.tests[name].message = message
+        },
+        setWarning({message}){
+            const longTimeOut = 7000
+            this.$q.notify({
+                type: 'warning',
+                timeout: longTimeOut,
+                position: 'top',
+                message: message,
+                multiline: true,
+            })
         }
     },
 })
-function initTests(tests){
-  app.$set(app._data, 'tests', {})
-  tests.forEach((e, i)=>{
-    var name = e.join('.')
-    app.$set(
-        app._data.tests, name, {
-        path: e,
-        index: i,
-    })
-    app.setTestStatus(app._data.tests[name], 'notRun')
-  })
-  app._data.loadingTests = false
-}
-function setResult({name, message, status}){
-    app.setTestStatus(app._data.tests[name], status)
-    app._data.tests[name].message = message
-}
-function setWarning({message}){
-    const longTimeOut = 7000
-    app.$q.notify({
-        type: 'warning',
-        timeout: longTimeOut,
-        position: 'top',
-        message: message,
-        multiline: true,
-    })
-}
