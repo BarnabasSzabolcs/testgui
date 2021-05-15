@@ -1,0 +1,42 @@
+.text-code {
+  font-family: 'Courier', monospace;
+}
+
+.code {
+  white-space: pre;
+}
+
+.selectable {
+  -webkit-user-select: text;
+  /* Chrome 49+ */
+  -moz-user-select: text;
+  /* Firefox 43+ */
+  -ms-user-select: text;
+  /* No support yet */
+  user-select: text;
+  /* Likely future */
+  cursor: text;
+}
+
+.clickable {
+  cursor: pointer;
+}
+.single-line{
+  white-space: nowrap;
+  -webkit-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+}
+sub{
+  position: relative;
+  top: 0.5em;
+}
+sub .q-icon{
+  font-size: 1.2em !important;
+}
+h2{
+  font-size: 18px;
+  font-weight: 500;
+}
+.q-tree__node--selected{
+  background: #eee !important;
+}
