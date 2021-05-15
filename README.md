@@ -7,6 +7,10 @@ replace your management command `test` with `testgui`. It works with the same pa
 
     python manage.py testgui
 
+Here's a screenshot with TestGUI in operation, after calling python manage.py testgui:
+
+![Django TestGUI screenshot](django-test-gui-screenshot.png)
+
 ### Installation:
 
     pip install testgui
