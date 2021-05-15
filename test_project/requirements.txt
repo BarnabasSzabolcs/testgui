@@ -4,11 +4,14 @@
 #
 #    pip-compile
 #
+ansi2html==1.6.0          # via -r ../requirements.in
 asgiref==3.3.4            # via django
-django==3.2.2             # via -r requirements.in
+django==3.2.2             # via -r ../requirements.in
+pygments==2.9.0           # via redgreenunittest
 pyobjc-core==7.2          # via pyobjc-framework-cocoa, pyobjc-framework-webkit, pywebview
 pyobjc-framework-cocoa==7.2  # via pyobjc-framework-webkit, pywebview
 pyobjc-framework-webkit==7.2  # via pywebview
 pytz==2021.1              # via django
-pywebview==3.4            # via -r requirements.in
+pywebview==3.4            # via -r ../requirements.in
+redgreenunittest==0.1.1   # via -r requirements.in
 sqlparse==0.4.1           # via django

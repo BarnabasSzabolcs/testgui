@@ -1,95 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>TestGUI</title>
-    <link href="material-icons.css" rel="stylesheet" type="text/css" />
-    <link href="quasar.min.css" rel="stylesheet" type="text/css" />
-    <style>
-        .text-code{
-          font-family: 'Courier', monospace;
-        }
-        .selectable{
-          -webkit-user-select: text;  /* Chrome 49+ */
-          -moz-user-select: text;     /* Firefox 43+ */
-          -ms-user-select: text;      /* No support yet */
-          user-select: text;          /* Likely future */
-          cursor: text;
-        }
-        .clickable{
-          cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-<div id="q-app">
-  <q-layout view="hHh lpR fFf">
 
-    <q-header bordered class="bg-white text-black" height-hint="98">
-        <q-btn @click="runAllTests" flat stretch>
-            Run all
+<head>
+  <meta charset="UTF-8">
+  <title>TestGUI</title>
+  <link href="material-icons.css" rel="stylesheet" type="text/css" />
+  <link href="quasar.min.css" rel="stylesheet" type="text/css" />
+  <link href="styles.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div id="q-app">
+    <q-layout view="hHh lpR fFf">
+
+      <q-header bordered class="bg-white text-black" height-hint="98">
+        <q-btn @click="runAllTests" flat stretch no-caps icon="play_arrow" color="positive">
+          <sub class="text-grey-7">all</sub>
+          <q-tooltip>Run all tests</q-tooltip>
         </q-btn>
-        <q-btn @click="runFailedTests" flat stretch>Run failed</q-btn>
-<!--  <q-btn @click="runSelectedTests" flat stretch>Run selected</q-btn>-->
-        <q-btn @click="repopulateTests" flat stretch>Repopulate tests</q-btn>
+        <q-btn @click="runSelectedTests" flat stretch no-caps icon="play_arrow" color="positive">
+          <sub class="text-grey-7">
+            <q-icon name="check_box"></q-icon>
+          </sub>
+          <q-tooltip>Run selected tests</q-tooltip>
+        </q-btn>
+        <q-btn @click="runFailedTests" flat stretch no-caps icon="play_arrow" color="positive">
+          <sub class="text-grey-7">
+            <q-icon name="highlight_off"></q-icon>
+          </sub>
+          <q-tooltip>Run failed tests</q-tooltip>
+        </q-btn>
+        <q-btn @click="repopulateTests" flat stretch no-caps>Repopulate</q-btn>
         <label>
-            <q-toggle v-model="expandProblems"></q-toggle>Expand problems
+          <q-toggle v-model="expandProblems"></q-toggle>Expand problems
         </label>
         <label>
-            <q-toggle v-model="reloadModules" disable></q-toggle>Reload modules
-            <q-tooltip>Reload modules before running tests</q-tooltip>
+          <q-toggle v-model="reloadModules" disable></q-toggle>Reload modules
+          <q-tooltip>Reload modules before running tests</q-tooltip>
         </label>
         <q-space></q-space>
-    </q-header>
+      </q-header>
 
-    <q-page-container>
-      <q-expansion-item v-for="(test, name) of tests" key="index"
-        expand-separator expand-icon-toggle
-        :value="test.expand"
-      >
-        <template v-slot:header>
-            <div class="q-item__section column q-item__section--avatar q-item__section--side justify-center">
-                <q-spinner v-if="test.status=='running'" @click="runTests([test])"></q-spinner>
-                <q-icon v-else
-                        :name="test | statusIcon"
-                        :class="test | statusColor"
-                        @click="runTests([test])"
-                        class="clickable"
-                        @mouseover="setHover(test, true)"
-                        @mouseleave="setHover(test, false)"
-                ></q-icon>
+      <q-page-container style="min-height: 100vh">
+        <q-splitter v-model="splitterModel" style="min-height: calc(100vh - 64px)">
+          <template v-slot:before>
+            <div class="q-pa-md">
+              <q-input ref="filter" v-model="filter" size="sm" dense label="Search test">
+                <template v-slot:append>
+                  <q-icon
+                      v-if="filter !== ''"
+                      @click="resetFilter"
+                      name="clear"
+                      class="cursor-pointer" />
+                </template>
+              </q-input>
+              <q-tree
+                  :expanded.sync="expanded"
+                  :nodes="testTree"
+                  :selected.sync="selected"
+                  selected-color="black"
+                  control-color="grey-6"
+                  :ticked.sync="ticked"
+                  :filter="filter"
+                  class="col-12 col-sm-6"
+                  node-key="label"
+                  tick-strategy="leaf"
+                  default-expand-all>
+
+                <template v-slot:default-header="prop">
+                  <div class="row col-grow single-line">
+                    {{ prop.node.title }}
+                    <q-space></q-space>
+                    <display-status
+                        class="q-ml-md"
+                        :status="prop.node.status"
+                        @run="runTestsForNode(prop.node)">
+                    </display-status>
+                  </div>
+                </template>
+
+              </q-tree>
             </div>
-            <div class="q-item__section column q-item__section--main justify-center">
-                <div class="q-item__label cursor-pointer" @click.self="test.expand = !test.expand">
-                    <span class="selectable">{{name}}</span>
+          </template>
+          <template v-slot:after>
+            <h2 class="q-mx-md q-my-none">{{ selected || 'Failed tests' }}</h2>
+            <div v-if="!selectedTests.length" class="q-mx-md">(None.)</div>
+            <q-expansion-item v-for="test of selectedTests" key="index" expand-separator expand-icon-toggle :value="test.expand">
+              <template v-slot:header>
+                <div class="q-item__section column q-item__section--main">
+                  <div
+                  @click.self="test.expand = !test.expand"
+                  class="q-item__label cursor-pointer">
+                    <display-status
+                        size="sm"
+                        class="inline-block"
+                        :status="test.status"
+                        @run="runTests([test])">
+                    </display-status>
+                    <span class="selectable">{{test.title}}</span>
+                  </div>
                 </div>
-            </div>
-        </template>
-        <q-card>
-          <q-card-section>
-            <pre
-                class="text-code selectable"
-                :class="{'text-grey': test.status=='running'}"
-                style="max-width: 100%; overflow: auto;"
-            >{{test.message}}</pre>
-          </q-card-section>
-        </q-card>
-      </q-expansion-item>
+              </template>
+              <q-card>
+                <q-card-section>
+                  <div
+                      v-html="test.message"
+                      :class="{'text-grey': test.status=='running'}"
+                      class="text-code code selectable"
+                      style="max-width: 100%; overflow: auto;"></div>
+                </q-card-section>
+              </q-card>
+            </q-expansion-item>
+          </template>
+        </q-splitter>
         <div v-if="loadingTests" class="fixed-center">
-            Loading tests... <q-spinner></q-spinner>
+          Loading tests... <q-spinner></q-spinner>
         </div>
-    </q-page-container>
-    <q-footer class="q-px-sm"
-              :class="{'text-black bg-white': !allSuccess, 'text-white bg-positive': allSuccess}"
-              bordered
-    >
-      <span v-for="(count, status) of nStatuses"> {{ status }}: {{ count }} </span>
-    </q-footer>
-  </q-layout>
-</div>
-<script src="lodash.min.js"></script>
-<script src="vue.min.js"></script>
-<script src="quasar.umd.min.js"></script>
-<script src="script.js"></script>
+      </q-page-container>
+      <q-footer
+          :class="{'text-black bg-white': !allSuccess, 'text-white bg-positive': allSuccess}"
+          class="q-px-sm"
+          bordered>
+        <span v-for="(count, status) of nStatuses">
+          {{ status }}: {{ count }}
+        </span>
+      </q-footer>
+    </q-layout>
+  </div>
+  <script src="lodash.min.js"></script>
+  <script src="vue.min.js"></script>
+  <script src="quasar.umd.min.js"></script>
+  <script src="script.js"></script>
 </body>
+
 </html>
