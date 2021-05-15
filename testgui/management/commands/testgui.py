@@ -1,20 +1,21 @@
 import datetime
 import importlib
-import os
 import pathlib
 import sys
 from os.path import dirname
 from threading import Thread
-from typing import List
-from unittest import TestCase
+from typing import List, Any, Tuple
+from unittest import TestCase, TestSuite
 
 import django
 import webview
 from ansi2html import Ansi2HTMLConverter
 from django.conf import settings
-from django.core.management.commands import test
+from django.core.management.commands import test as django_test_command
 # noinspection PyProtectedMember
 from django.test.utils import get_runner
+
+from testgui import TEST_GUI_INDEX_PATH
 
 load_time = datetime.datetime.now()
 
@@ -41,18 +42,17 @@ class Api:
         self.old_config = old_config
         self.test_labels = test_labels
         self.test_runner = test_runner
+        self.suite = test_runner.build_suite(test_labels)
         self.window = None
         super().__init__()
 
-    @staticmethod
-    def collect_tests(test_runner, test_labels):
-        suite = test_runner.build_suite(test_labels)
-        return [get_path(test) for test in suite._tests]
+    def collect_tests(self) -> List[str]:
+        # noinspection PyProtectedMember
+        return [get_path(test) for test in self.suite._tests]
 
     def init_tests(self, window):
-        self.tests = self.collect_tests(self.test_runner, self.test_labels)
         self.window = window
-        window.evaluate_js(f'app.initTests({self.tests})')
+        window.evaluate_js(f'app.initTests({self.collect_tests()})')
 
     def reload_code(self):
         project_folder = dirname(sys.modules['__main__'].__file__)
@@ -81,55 +81,50 @@ class Api:
     def repopulate_tests(self):
         print('repopulating tests...')
         self.reload_code()
-        populate_tests(self.test_runner, self.test_labels)
+        _, self.suite = populate_tests(self.test_runner, self.test_labels)
         self.init_tests(self.window)
 
     def run_all_tests(self):
         self.reload_code()
-        for test in self.tests:
+        # noinspection PyProtectedMember
+        for test in self.suite._tests:
             self.run_test(test)
 
     def run_selected_tests(self, indices):
         self.reload_code()
         for index in sorted(indices):
-            self.run_test(self.tests[index])
+            # noinspection PyProtectedMember
+            self.run_test(self.suite._tests[index])
 
-    def run_test(self, test):
+    def run_test(self, test_case: TestCase):
         if self.window is None:
             raise AssertionError('Please run api.init first')
-        th = Thread(target=lambda: self.run_test_job('.'.join(test)))
+        th = Thread(target=lambda: self.run_test_job(test_case))
         th.start()
         th.join()
 
-    def run_test_job(self, test_label):
+    def run_test_job(self, test_case: TestCase):
         try:
-            suite = self.test_runner.build_suite((test_label,))
-            tests = suite._tests[:]
-            results = self.test_runner.run_suite(suite)
-            self.send_results(tests, results)
+            results = self.test_runner.run_suite(test_case)
+            self.send_results([test_case], results)
         except Exception as e:
             msg = f'ERROR: Could not run the test, the following error was raised:\n\n{e.args[0]}'
-            self.send_result(test_case=test_label, msg=msg, status='error')
+            self.send_result(test_case=test_case, msg=msg, status='error')
 
-    def send_warning(self, msg):
+    def send_warning(self, msg: str):
         print(f'WARNING: {msg}')
         msg = msg.replace('"', r'\"').replace('\n', r'\n')
         code = f'app.setWarning({{ message: "{msg}"}})'
         self.window.evaluate_js(code)
 
-    def send_result(self, test_case, msg, status):
-        if isinstance(test_case, str):
-            name = test_case
-        elif isinstance(test_case, TestCase):
-            name = ".".join(get_path(test_case))
-        else:
-            raise NotImplementedError
+    def send_result(self, test_case: TestCase, msg: str, status: str):
+        name = get_path(test_case)
         msg = html_from_ansi(msg)
         msg = msg.replace('"', r'\"').replace('\n', r'\n')
         code = f'app.setResult({{name: "{name}", status: "{status}", message: "{msg}"}})'
         self.window.evaluate_js(code)
 
-    def send_results(self, tests, results):
+    def send_results(self, tests: List[TestCase], results):
         unsuccessful = set()
 
         for test, msg in results.failures:
@@ -144,7 +139,7 @@ class Api:
             self.send_result(test, '', status='success')
 
 
-class Command(test.Command):
+class Command(django_test_command.Command):
     help = "Runs tests via GUI to accelerate running specific tests."
 
     def handle(self, *test_labels, **options):
@@ -153,35 +148,38 @@ class Command(test.Command):
         # noinspection PyPep8Naming
         TestRunner = get_runner(settings, options['testrunner'])
         test_runner = TestRunner(**options)
-        test_runner.setup_test_environment()
-        old_config = populate_tests(test_runner, test_labels)
-        run_failed = False
-        try:
-            old_config = self.create_gui(test_runner, test_labels, old_config)
-        except Exception:
-            run_failed = True
-            raise
-        finally:
-            teardown(old_config, run_failed, test_runner)
-
-    def create_gui(self, test_runner, test_labels, old_config):
-        api = Api(test_runner, test_labels, old_config)
-        this_file = os.path.dirname(__file__)
-        testgui_path = this_file[:-len('/management/commands')]
-        window = webview.create_window('TestGUI',
-                                       os.path.join(testgui_path, 'assets/index.html'),
-                                       js_api=api,
-                                       min_size=(600, 450),
-                                       )
-        webview.start(api.init_tests, window, debug=True)
-        return api.old_config
+        run_test_gui(test_runner, test_labels)
 
 
-def get_path(test: TestCase) -> List[str]:
+def run_test_gui(test_runner, test_labels):
+    test_runner.setup_test_environment()
+    old_config, _ = populate_tests(test_runner, test_labels)
+    run_failed = False
+    try:
+        old_config = create_test_gui(test_runner, test_labels, old_config)
+    except Exception:
+        run_failed = True
+        raise
+    finally:
+        teardown(old_config, run_failed, test_runner)
+
+
+def create_test_gui(test_runner, test_labels, old_config):
+    api = Api(test_runner, test_labels, old_config)
+    window = webview.create_window(
+        'TestGUI',
+        TEST_GUI_INDEX_PATH,
+        js_api=api,
+        min_size=(600, 450))
+    webview.start(api.init_tests, window, debug=True)
+    return api.old_config
+
+
+def get_path(test: TestCase) -> str:
     path = test.__module__.split('.')
     # noinspection PyProtectedMember
     path += [test.__class__.__name__, test._testMethodName]
-    return path
+    return '.'.join(path)
 
 
 def teardown(old_config, run_failed, test_runner):
@@ -195,7 +193,7 @@ def teardown(old_config, run_failed, test_runner):
             raise
 
 
-def populate_tests(test_runner, test_labels):
+def populate_tests(test_runner, test_labels) -> Tuple[Any, TestSuite]:
     suite = test_runner.build_suite(test_labels)
     # modified version of DiscoverRunner's run_tests
     databases = test_runner.get_databases(suite)
@@ -209,4 +207,4 @@ def populate_tests(test_runner, test_labels):
         run_failed = True
         teardown(old_config, run_failed, test_runner)
         raise
-    return old_config
+    return old_config, suite

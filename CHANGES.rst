@@ -8,6 +8,8 @@ Changelog
   - Make hot-reload optional
   - Ability to restrict by tags
 
+  - Make it run faster
+
 0.2
 ===
 

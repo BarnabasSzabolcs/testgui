@@ -194,7 +194,7 @@ const app = new Vue({
       this.$set(this, 'testTree', [])
 
       tests.forEach((path, i) => {
-        const { tree, name } = path.reduce(({ tree, name }, pathComponent) => {
+        const { tree, name } = path.split('.').reduce(({ tree, name }, pathComponent) => {
           let children
           if (_.isArray(tree)) {
             children = tree
