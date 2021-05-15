@@ -2,15 +2,20 @@
 Changelog
 *********
 
-0.2 -- planned features
+0.3 -- planned
+===
+
+  - Make hot-reload optional
+  - Ability to restrict by tags
+
+0.2
 ===
 
  - Compatibility with redgreenunittest (done)
  - Tree layout of test cases with per module stats
  - Ability to run tests within a module
  - Ability to run tests within a TestCase class
- - Ability to restrict by tags
- - Makes hot-reload optional
+ - Ability to view only the failed tests
 
 0.1.1
 =====
