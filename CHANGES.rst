@@ -2,13 +2,18 @@
 Changelog
 *********
 
-0.3 -- planned
+0.4 -- planned
 ===
 
-  - Make hot-reload optional
-  - Ability to restrict by tags
+ - Make hot-reload optional
+ - Ability to restrict by tags
+ - Ability to stop tests
 
-  - Make it run faster
+0.3
+===
+
+ - Make it compatible with unittest
+ - Make it run faster
 
 0.2
 ===

@@ -1,11 +1,18 @@
 # testgui
-Drop-in replacement GUI for Django testing.
+Drop-in replacement GUI for Django testing and testing with unittest.
 
 ### Usage:
 
-replace your management command `test` with `testgui`. It works with the same parameters out of the box. eg.
+Django: replace your management command `test` with `testgui`. It works with the same parameters out of the box. eg.
 
     python manage.py testgui
+
+Unittest: change your test file code like this:
+
+    from testgui import unittestgui
+    ...
+    if __name__ == '__main__':
+        unittestgui.main()  # instead of unittest.main()
 
 Here's a screenshot with TestGUI in operation, after calling python manage.py testgui:
 
@@ -15,7 +22,9 @@ Here's a screenshot with TestGUI in operation, after calling python manage.py te
 
     pip install testgui
 
-Then add testgui to INSTALLED_APPS in settings.py:
+To use with unittests you are set up.
+
+To use django management command, add testgui to INSTALLED_APPS in settings.py:
 
     INSTALLED_APPS = [
         ...
@@ -25,7 +34,7 @@ Then add testgui to INSTALLED_APPS in settings.py:
 
 #### Dependencies: 
 
- * django
+ * [django] [only required if you want to use it as a django management command]
  * pywebview
 
  Compatible with redgreenunittest.
