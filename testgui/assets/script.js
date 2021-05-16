@@ -22,7 +22,7 @@ Vue.component('display-status', {
       <div class="inline-block" :class="{'q-mr-xs': displaySpinner && !size}">
         <q-spinner 
             v-if="displaySpinner" 
-            @click="$emit('run')" 
+            @click.stop="$emit('run')"
             :size="size"
         ></q-spinner>
         <q-icon
@@ -30,7 +30,7 @@ Vue.component('display-status', {
             :size="size"
             :class="displayIconStatus | statusColor"
             :name="displayIconStatus | statusIcon"
-            @click="$emit('run')"
+            @click.stop="$emit('run')"
             class="clickable"></q-icon>
       </div>
     </div>
