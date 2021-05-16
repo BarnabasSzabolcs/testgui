@@ -5,9 +5,12 @@ Changelog
 0.4 -- planned
 ===
 
+ - Add test timings
+ - Don't expand tree items initially (it clogs up the GUI if there are many modules)
  - Make hot-reload optional
  - Ability to restrict by tags
  - Ability to stop tests
+ - Make it pytest compatible
 
 0.3
 ===
