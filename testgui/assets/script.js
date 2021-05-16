@@ -10,12 +10,21 @@ function getLeaves (tree) {
   return _.flatten(leaves)
 }
 
+function sortObjectByPriority (obj) {
+  const priorities = ['notRun', 'success', 'error', 'failure', 'running']
+  const collection = _.map(obj, (v, k) => {
+    return { key: k, value: v }
+  })
+  const sorted = _.sortBy(collection, o => priorities.indexOf(o.key))
+  return _.fromPairs(_.map(sorted, o => [o.key, o.value]))
+}
+
 Vue.component('display-status', {
   props: ['status', 'size'],
   template: `
     <div class="single-line">
       <div v-if="displayDetails" class="inline-block" style="opacity: 0.8">
-        <span v-for="(count, statusName) of status" :class="statusName | statusColor">
+        <span v-for="(count, statusName) of orderedStatuses" :class="statusName | statusColor">
           {{ count }}
         </span>
       </div>
@@ -73,6 +82,9 @@ Vue.component('display-status', {
     },
     displaySpinner () {
       return this.displayIconStatus === 'running'
+    },
+    orderedStatuses () {
+      return sortObjectByPriority(this.status)
     }
   }
 })
