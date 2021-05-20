@@ -57,7 +57,7 @@ Vue.component('display-status', {
     statusColor: function (status) {
       return {
         run: 'text-black',
-        notRun: 'text-black',
+        notRun: 'text-grey-7',
         success: 'text-positive',
         error: 'text-warning',
         failure: 'text-negative'
