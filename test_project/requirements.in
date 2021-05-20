@@ -1,3 +1,4 @@
 redgreenunittest
 -r ../requirements.in
+django
 # pip-tools==5.4.0
